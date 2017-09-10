@@ -2,27 +2,23 @@ import {Component} from 'preact';
 
 export default class Input extends Component {
 
-    constructor() {
-        super();
-        this.state = {
-            input: ""
-        };
-    }
-
-    inputChange = (e) => {
-        this.setState({
-            input: e.target.value
-        })
+    submit = () => {
+        this.props.submit(this.input.value);
     };
 
-    submit = () => {
-        this.props.submit(this.state.input);
+    handleKeyPress = (event) => {
+        if(event.key === 'Enter') {
+            this.submit();
+        }
     };
 
     render() {
         return (
             <div>
-                <input onInput={this.inputChange} placeholder="Use that keyboard here..."/>
+                <input  ref={input => this.input = input}
+                        placeholder="Use that keyboard here..."
+                        value={this.props.value}
+                        onKeyPress={this.handleKeyPress}/>
                 <button onClick={this.submit}>Submit</button>
             </div>
         );

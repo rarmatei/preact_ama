@@ -10,8 +10,8 @@ class Service {
     static CURR_USER_KEY = 'currUser';
 
     constructor() {
+        //TODO add logic to add new user to DB on first visit
         const currUser = this.storage.getItem(Service.CURR_USER_KEY);
-        debugger;
         this.user$ = new BehaviorSubject(currUser);
         firebase.auth()
             .onAuthStateChanged((user) => {
@@ -22,7 +22,6 @@ class Service {
             });
         this.distinctUser$ = this.user$
             .distinctUntilChanged((prev, curr) => {
-                debugger;
                 return (prev && prev.uid) === (curr && curr.uid);
             });
     }

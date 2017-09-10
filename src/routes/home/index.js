@@ -9,19 +9,52 @@ export default class Home extends Component {
 	constructor() {
 		super();
 		this.state = {
-			questions: []
+			questions: [],
+			showInput: false,
+			inputValue: "",
+			selectedQuestionId: undefined
 		};
-
 		questionsService.getQuestions()
 			.subscribe(questions => {
 				this.setState({questions});
 			});
 	}
 
+	//TODO rename to submit answer
 	submitQuestion = (answer) => {
-		console.log("in parent: " + answer);
-
+		if(answer) {
+			questionsService
+				.setAnswer(this.state.selectedQuestionId, answer);
+		}
+		this.setState({
+			showInput: false,
+			inputValue: "",
+			selectedQuestionId: undefined
+		});
 	};
+
+	launchNewInput(questionId) {
+		//TODO stop this is question already answered
+		console.log(`New ${questionId} clicked`);
+		this.setState({
+			showInput: true,
+			inputValue: "",
+			selectedQuestionId: questionId
+		});
+	}
+
+	launchEditInput(questionId) {
+		console.log(`Edit ${questionId} clicked`);
+		const question = this.state.questions
+			.find(question => question.id === questionId);
+		this.setState({
+			showInput: true,
+			inputValue: question.answer,
+			selectedQuestionId: questionId
+		});
+	}
+
+	//TODO show error message if empty/invalid answer provided
 
 	render() {
 		return (
@@ -29,9 +62,17 @@ export default class Home extends Component {
 				<h1>Home</h1>
 				<p>This is the Home component.</p>
 				{this.state.questions.map(question =>
-					<QuestionRow question={question} />
+					<QuestionRow question={question} 
+								 onQuestionClick={this.launchNewInput.bind(this, question.id)}
+								 onAnswerClick={this.launchEditInput.bind(this, question.id)}/>
 				)}
-				<Input submit={this.submitQuestion} />
+				{
+					this.state.showInput 
+						? <Input value={this.state.inputValue} 
+								 submit={this.submitQuestion} />
+						: null
+				}
+				
 			</div>
 		);
 	}

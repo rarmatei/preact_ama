@@ -7,7 +7,7 @@ export default class Question extends Component {
 
     render() {
         return (
-            <div>{this.props.children}</div>
+            <div onClick={this.props.onClick}>{this.props.children}</div>
         );
     }
 }

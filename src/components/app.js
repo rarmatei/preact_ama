@@ -27,7 +27,6 @@ export default class App extends Component {
 		const routes = Observable
 			.combineLatest(this.currUrl$, this.loggedIn$)
 			.map(([currUrl, loggedIn]) => {
-				debugger;
 				if (loggedIn && currUrl === '/login') {
 					return '/home';
 				}

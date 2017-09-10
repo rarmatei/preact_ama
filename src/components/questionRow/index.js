@@ -3,14 +3,15 @@ import Question from '../question/index';
 import Answer from '../answer/index';
 
 export default class QuestionRow extends Component {
+
     render() {
         return (
             <div>
                 Q-ROW <br/>
                 Question <br/>
-                <Question>{this.props.question.ask}</Question>
+                <Question onClick={this.props.onQuestionClick}>{this.props.question.ask}</Question>
                 Answer <br/>
-                <Answer>{this.props.question.answer}</Answer>
+                <Answer onClick={this.props.onAnswerClick}>{this.props.question.answer}</Answer>
             </div>
         );
     }
