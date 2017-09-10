@@ -4,6 +4,8 @@ import Match from "preact-router/match";
 import questionsService from "../../services/questions-service";
 import Input from "../../components/input";
 import Question from "../../components/question";
+import {ReplaySubject} from "rxjs/ReplaySubject";
+import "rxjs/add/operator/switchMap";
 
 class Ask extends Component {
 
@@ -14,11 +16,22 @@ class Ask extends Component {
             inputValue: '',
             questions: []
         };
-        //TODO change to only get questions for this specific route user
-        questionsService.getQuestions()
+        
+        this.userId$
+            .switchMap(id => {
+                return questionsService.getQuestionsForUserId(id);
+            })        
             .subscribe(questions => {
                 this.setState({ questions });
             });
+    }
+
+    userId$ = new ReplaySubject(1);
+
+    componentDidUpdate(prevProps, prevState) {
+        if(prevState.userId !== this.state.userId) {
+            this.userId$.next(this.state.userId);
+        }
     }
 
     setUserId = (path) => {
@@ -28,7 +41,8 @@ class Ask extends Component {
 
     submitQuestion = (question) => {
         if (question) {
-            console.log(question);
+            questionsService
+                .addQuestion(question, this.state.userId);
         }
         this.setState({
             inputValue: ''
