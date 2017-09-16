@@ -14,7 +14,7 @@ export default class Home extends Component {
 			inputValue: "",
 			selectedQuestionId: undefined
 		};
-		questionsService.getQuestions()
+		questionsService.getQuestionsForCurrentUser()
 			.subscribe(questions => {
 				this.setState({questions});
 			});

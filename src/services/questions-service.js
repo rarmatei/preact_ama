@@ -1,6 +1,7 @@
 import firebase from "../firebase-config";
 import { ReplaySubject } from "rxjs/ReplaySubject";
 import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/switchMap';
 import { Observable } from "rxjs/Observable";
 import "rxjs/add/observable/combineLatest";
 import userProfileService from './user-profile-service';
@@ -26,12 +27,13 @@ class Service {
     questions$ = new ReplaySubject(1);
     questionsMap$ = new ReplaySubject(1);
 
-    //TODO change to getQuestionsForCurrUser
-    getQuestions() {
-        return this.questions$;
+    getQuestionsForCurrentUser() {
+        return userProfileService.getCurrentUser()
+            .map(user => user.uid)
+            .switchMap(this.getQuestionsForUserId);
     }
 
-    getQuestionsForUserId(userId) {
+    getQuestionsForUserId = (userId) => {
         const userQuestions = userProfileService
             .getUserQuestionIds(userId);
 
@@ -71,6 +73,7 @@ class Service {
     // private
 
     generateQuestions(firebaseQuestions) {
+        debugger;
         return Object.keys(firebaseQuestions)
             .map(key => {
                 const { ask, answer } = firebaseQuestions[key];
