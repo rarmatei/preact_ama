@@ -7,6 +7,8 @@ import 'rxjs/add/operator/startWith';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/filter';
 
+import memoize from "lodash/memoize";
+
 class Service {
 
     static CURR_USER_KEY = 'currUser';
@@ -43,28 +45,33 @@ class Service {
     }
 
     getUserQuestionIds(userId) {
-        return Observable.create(observer => {
-            const ref = firebase.database()
-                .ref(`users/${userId}`);
-            const listener = ref
-                .on('value', (snapshot) => {
-                    const user = snapshot.val();
-                    observer.next(user);
-                });
-            return () => {
-                ref.off('value', listener);
-            };
-        })
-            .map(user => user.questions)
+        return Observable
+            .create(observer => {
+                const ref = this.userQuestionsRef(userId)
+                const listener = ref
+                    .on('value', (snapshot) => {
+                        const questions = snapshot.val();
+                        observer.next(questions);
+                    });
+                return () => {
+                    ref.off('value', listener);
+                };
+            })
             .map(Object.values);
     }
 
     addQuestion(userId, questionId) {
-        firebase
-            .database()
-            .ref(`users/${userId}/questions`)
+        this.userQuestionsRef(userId)
             .push(questionId);
     }
+
+    //private
+
+    userQuestionsRef = memoize((userId) => {
+        return firebase
+            .database()
+            .ref(`users/${userId}/questions`);
+    });
 }
 
 //TODO make User class and make both users and currUser use it
