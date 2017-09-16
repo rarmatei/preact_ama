@@ -1,6 +1,7 @@
 import firebase from "../firebase-config";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
-import {ReplaySubject} from "rxjs/ReplaySubject";
+import { Observable } from "rxjs/Observable";
+import { ReplaySubject } from "rxjs/ReplaySubject";
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/startWith';
 import 'rxjs/add/operator/distinctUntilChanged';
@@ -12,36 +13,24 @@ class Service {
 
     constructor() {
         //TODO add logic to add new user to DB on first visit
-        const currUser = this.storage.getItem(Service.CURR_USER_KEY);
-        this.user$ = new BehaviorSubject(currUser);
-        this.allUsers$ = new ReplaySubject();
+        const storage = window.localStorage;
+        const currUser = storage.getItem(Service.CURR_USER_KEY);
+        const rawUser$ = new BehaviorSubject(currUser);
         firebase.auth()
             .onAuthStateChanged((user) => {
-                this.user$.next(user);
-                if(user) {
-                    this.storage.setItem('currUser', user);
-                }
+                rawUser$.next(user);
+                storage.setItem('currUser', user);
             });
-        this.distinctUser$ = this.user$
+        this.user$ = rawUser$
             .distinctUntilChanged((prev, curr) => {
                 return (prev && prev.uid) === (curr && curr.uid);
             });
-        firebase.database()
-            .ref('users')
-            .on('value', (snapshot) => {
-                const users = snapshot.val();
-                this.allUsers$.next(users);
-            });
     }
 
-
-    storage = window.localStorage;
     user$;
-    distinctUser$;
-    allUsers$;
 
     isLoggedIn() {
-        return this.distinctUser$
+        return this.user$
             .map(Boolean);
     }
 
@@ -50,12 +39,23 @@ class Service {
     }
 
     getCurrentUser() {
-        return this.distinctUser$;
+        return this.user$;
     }
 
     getUserQuestionIds(userId) {
-        return this.allUsers$
-            .map(users => users[userId].questions)
+        return Observable.create(observer => {
+            const ref = firebase.database()
+                .ref(`users/${userId}`);
+            const listener = ref
+                .on('value', (snapshot) => {
+                    const user = snapshot.val();
+                    observer.next(user);
+                });
+            return () => {
+                ref.off('value', listener);
+            };
+        })
+            .map(user => user.questions)
             .map(Object.values);
     }
 

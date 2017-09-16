@@ -73,7 +73,6 @@ class Service {
     // private
 
     generateQuestions(firebaseQuestions) {
-        debugger;
         return Object.keys(firebaseQuestions)
             .map(key => {
                 const { ask, answer } = firebaseQuestions[key];
