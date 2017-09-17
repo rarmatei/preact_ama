@@ -28,6 +28,7 @@
     "preact": "^8.2.4",
     "preact-compat": "^3.17.0",
     "preact-router": "^2.5.7",
+    "react-spin": "^0.6.2",
     "rxjs": "^5.4.3"
   }
 }

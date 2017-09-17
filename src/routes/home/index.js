@@ -35,7 +35,6 @@ export default class Home extends Component {
 
 	launchNewInput(questionId) {
 		//TODO stop this is question already answered
-		console.log(`New ${questionId} clicked`);
 		this.setState({
 			showInput: true,
 			inputValue: "",
@@ -44,7 +43,6 @@ export default class Home extends Component {
 	}
 
 	launchEditInput(questionId) {
-		console.log(`Edit ${questionId} clicked`);
 		const question = this.state.questions
 			.find(question => question.id === questionId);
 		this.setState({

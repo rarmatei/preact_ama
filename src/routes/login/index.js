@@ -11,10 +11,7 @@ export default class Home extends Component {
     //question how can I create a login/user service to solve my issue with passing the username around
     login() {
         firebase.auth()
-        .signInAnonymously()
-        .then(() => {
-            console.log("AUTHED!!");
-        });
+        .signInAnonymously();
     }
 
     render() {

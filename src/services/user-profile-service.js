@@ -6,7 +6,10 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/startWith';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/filter';
-
+import 'rxjs/add/operator/switchMap';
+import 'rxjs/add/observable/of';
+import 'rxjs/add/operator/take';
+import 'rxjs/add/operator/delay';
 import memoize from "lodash/memoize";
 
 class Service {
@@ -14,20 +17,18 @@ class Service {
     static CURR_USER_KEY = 'currUser';
 
     constructor() {
-        //TODO add logic to add new user to DB on first visit
-        const storage = window.localStorage;
-        const currUser = storage.getItem(Service.CURR_USER_KEY);
-        const rawUser$ = new BehaviorSubject(currUser);
+        const rawUser$ = new ReplaySubject(1);
         firebase.auth()
             .onAuthStateChanged((user) => {
                 rawUser$.next(user);
-                storage.setItem('currUser', user);
             });
         this.user$ = rawUser$
             .distinctUntilChanged((prev, curr) => {
                 return (prev && prev.uid) === (curr && curr.uid);
             });
     }
+
+    //TODO create database security rules
 
     user$;
 
@@ -37,7 +38,18 @@ class Service {
     }
 
     getUser(userId) {
-        //TODO implement this
+        if (!userId) {
+            return Observable.of(undefined);
+        }
+        return Observable.create(observer => {
+            const ref = this.userRef(userId);
+            const listener = ref.on('value', (snapshot) => {
+                observer.next(snapshot.val());
+            });
+            return () => {
+                ref.off('value', listener);
+            };
+        });
     }
 
     getCurrentUser() {
@@ -47,11 +59,15 @@ class Service {
     getUserQuestionIds(userId) {
         return Observable
             .create(observer => {
-                const ref = this.userQuestionsRef(userId)
+                const ref = this.userRef(userId).child('questions');
                 const listener = ref
                     .on('value', (snapshot) => {
                         const questions = snapshot.val();
-                        observer.next(questions);
+                        observer.next(
+                            questions
+                                ? questions
+                                : {}
+                        );
                     });
                 return () => {
                     ref.off('value', listener);
@@ -61,16 +77,17 @@ class Service {
     }
 
     addQuestion(userId, questionId) {
-        this.userQuestionsRef(userId)
+        this.userRef(userId)
+            .child('questions')
             .push(questionId);
     }
-
+s
     //private
 
-    userQuestionsRef = memoize((userId) => {
+    userRef = memoize((userId) => {
         return firebase
             .database()
-            .ref(`users/${userId}/questions`);
+            .ref(`users/${userId}`);
     });
 }
 

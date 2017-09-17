@@ -2,6 +2,7 @@ import firebase from "../firebase-config";
 import { ReplaySubject } from "rxjs/ReplaySubject";
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/switchMap';
+import 'rxjs/add/operator/do';
 import { Observable } from "rxjs/Observable";
 import "rxjs/add/observable/combineLatest";
 import userProfileService from './user-profile-service';
@@ -63,7 +64,6 @@ class Service {
     }
 
     setAnswer(questionId, answer) {
-        console.log(`${questionId} :: ${answer}`);
         firebase
             .database()
             .ref(`questions/${questionId}`)
