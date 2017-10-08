@@ -1,4 +1,5 @@
 import {Component} from 'preact';
+import style from "./style";
 
 export default class Question extends Component {
     constructor() {
@@ -7,7 +8,7 @@ export default class Question extends Component {
 
     render() {
         return (
-            <div onClick={this.props.onClick}>{this.props.children}</div>
+            <div class={style.question} onClick={this.props.onClick}>{this.props.children}</div>
         );
     }
 }

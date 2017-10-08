@@ -1,0 +1,16 @@
+.questionRow {
+    display:flex;
+    flex-direction: column;
+}
+
+.questionRow__row {
+    max-width: 70%;
+    margin: 5px 0px 5px 0px;
+}
+
+.questionRow__question {
+    align-self: flex-start;
+}
+.questionRow__answer {
+    align-self: flex-end;
+}
